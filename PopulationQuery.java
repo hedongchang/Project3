@@ -65,39 +65,57 @@ public class PopulationQuery {
 		int x = Integer.parseInt(args[1]);
 		int y = Integer.parseInt(args[2]);
 		int version = Integer.parseInt(args[3]);
-		int[] bounds = askForInput();
-        float[] corner = getCorner(data);
+		int[] bounds = askForInput(x, y);
+        CensusResult result = getCorner(data);
 		if (version == 1) {
-			Version1.calculatePopulation(bounds, data, corner, x, y);
+			Version1.calculatePopulation(bounds, data, result, x, y);
 		} else if (version == 2) {
-			Version2.calcualtePopulation(bounds, data, corner, x, y);
+			Version2.calcualtePopulation(bounds, data, result, x, y);
 		}
 	}
 	
-	private static float[] getCorner(CensusData data) {
+	private static CensusResult getCorner(CensusData data) {
 		// latMin latMax longMin longMax
-		float[] result = new float[4];
 		CensusGroup first = data.data[0];
-		result[0] = first.latitude;
-		result[3] = first.longitude;
-		for (int i = 1; i < data.data_size; i++) {
+		CensusResult result = new CensusResult(first.latitude, first.latitude, 
+				first.longitude, first.longitude, 0);
+		for (int i = 0; i < data.data_size; i++) {
 			float latitude = data.data[i].latitude;
 			float longitude = data.data[i].longitude;
-			result[0] = Math.min(result[0], latitude);
-			result[1] = Math.max(result[1], latitude);
-			result[2] = Math.min(result[3], longitude);
-			result[3] = Math.max(result[3], longitude);
+			result.latMin = Math.min(result.latMin, latitude);
+			result.latMax = Math.max(result.latMax, latitude);
+			result.longMin = Math.min(result.longMin, longitude);
+			result.longMax = Math.max(result.longMax, longitude);
+			result.population = result.population + data.data[i].population;
 		}
 		return result;
 	}
 	
-	private static int[] askForInput() {
+	private static int[] askForInput(int x, int y) {
 		Scanner input = new Scanner(System.in);
 		int i = 0;
 		int[] bounds = new int[4];
-		System.out.println("Give bounds of a census group");
+		System.out.println("Give bounds of a census group (south, north, west, east)");
 		while (i < bounds.length && input.hasNextInt()) {
-			bounds[i] = input.nextInt();
+			int inputNum = input.nextInt();
+			if (i == 0) {
+				if (inputNum < 1 || inputNum > y) {
+					System.err.println("wrong bound");
+				} 
+			} else if (i == 1) {
+				if (inputNum < bounds[0] || inputNum > y) {
+					System.err.println("wrong bound");
+				}
+			} else if (i == 2) {
+				if (inputNum < 1 || inputNum > x) {
+					System.err.println("wrong bound");
+				}
+			} else {
+				if (inputNum < bounds[2] || inputNum > x) {
+					System.err.println("wrong bound");
+				}
+			}
+			bounds[i] = inputNum;
 			i++;
 		}
 		if (i != 3) {
@@ -112,7 +130,7 @@ public class PopulationQuery {
 		
 	}
 	
-	public static Pair singleInteraction(int w, int s, int e, int n) {
-		return new Pair(1, 0.1);
+	public static Pair<Integer, Double> singleInteraction(int w, int s, int e, int n) {
+		return new Pair<Integer, Double>(1, 0.1);
 	}
 }
