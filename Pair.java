@@ -12,6 +12,6 @@ public class Pair<T,S> {
 		return elt1;
 	}
 	public S getElementB(){
-		return elt2;
+		return elt2; 
 	}
 }
