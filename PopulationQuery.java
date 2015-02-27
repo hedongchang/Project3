@@ -15,7 +15,7 @@ public class PopulationQuery {
 	public static CensusData parse(String filename) {
 		CensusData result = new CensusData();
         try {
-            BufferedReader fileIn = new BufferedReader(new FileReader(filename));
+			BufferedReader fileIn = new BufferedReader(new FileReader(filename));
             
             // Skip the first line of the file
             // After that each line has 7 comma-separated numbers (see constants above)
@@ -66,29 +66,12 @@ public class PopulationQuery {
 		int y = Integer.parseInt(args[2]);
 		int version = Integer.parseInt(args[3]);
 		int[] bounds = askForInput(x, y);
-        CensusResult result = getCorner(data);
 		if (version == 1) {
+	        CensusResult result = Version1.getCorner(data);
 			Version1.calculatePopulation(bounds, data, result, x, y);
 		} else if (version == 2) {
-			Version2.calcualtePopulation(bounds, data, result, x, y);
+			Version2.calcualtePopulation(bounds, data, x, y);
 		}
-	}
-	
-	private static CensusResult getCorner(CensusData data) {
-		// latMin latMax longMin longMax
-		CensusGroup first = data.data[0];
-		CensusResult result = new CensusResult(first.latitude, first.latitude, 
-				first.longitude, first.longitude, 0);
-		for (int i = 0; i < data.data_size; i++) {
-			float latitude = data.data[i].latitude;
-			float longitude = data.data[i].longitude;
-			result.latMin = Math.min(result.latMin, latitude);
-			result.latMax = Math.max(result.latMax, latitude);
-			result.longMin = Math.min(result.longMin, longitude);
-			result.longMax = Math.max(result.longMax, longitude);
-			result.population = result.population + data.data[i].population;
-		}
-		return result;
 	}
 	
 	private static int[] askForInput(int x, int y) {
@@ -97,30 +80,24 @@ public class PopulationQuery {
 		int[] bounds = new int[4];
 		System.out.println("Give bounds of a census group (south, north, west, east)");
 		while (i < bounds.length && input.hasNextInt()) {
-			int inputNum = input.nextInt();
-			if (i == 0) {
-				if (inputNum < 1 || inputNum > y) {
-					System.err.println("wrong bound");
-				} 
-			} else if (i == 1) {
-				if (inputNum < bounds[0] || inputNum > y) {
-					System.err.println("wrong bound");
-				}
-			} else if (i == 2) {
-				if (inputNum < 1 || inputNum > x) {
-					System.err.println("wrong bound");
-				}
-			} else {
-				if (inputNum < bounds[2] || inputNum > x) {
-					System.err.println("wrong bound");
-				}
-			}
-			bounds[i] = inputNum;
+			bounds[i] = input.nextInt();
 			i++;
 		}
 		if (i != 3) {
 			System.err.println("Incorrect number of bounds");
 			System.exit(1);
+		}
+		if (bounds[0] < 1 || bounds[0] > y) {
+			System.err.println("wrong bound");
+		} 
+		if (bounds[1] < bounds[0] || bounds[1] > y) {
+			System.err.println("wrong bound");
+		}
+		if (bounds[2] < 1 || bounds[2] > x) {
+			System.err.println("wrong bound");
+		}
+		if (bounds[3] < bounds[2] || bounds[3] > x) {
+			System.err.println("wrong bound");
 		}
 		input.close();
 		return bounds;

@@ -23,4 +23,21 @@ public class Version1 extends Version {
 		}
 		report(groupPop, result.population);
 	}
+	
+	public static CensusResult getCorner(CensusData data) {
+		// latMin latMax longMin longMax
+		CensusGroup first = data.data[0];
+		CensusResult result = new CensusResult(first.latitude, first.latitude, 
+				first.longitude, first.longitude, 0);
+		for (int i = 0; i < data.data_size; i++) {
+			float latitude = data.data[i].latitude;
+			float longitude = data.data[i].longitude;
+			result.latMin = Math.min(result.latMin, latitude);
+			result.latMax = Math.max(result.latMax, latitude);
+			result.longMin = Math.min(result.longMin, longitude);
+			result.longMax = Math.max(result.longMax, longitude);
+			result.population = result.population + data.data[i].population;
+		}
+		return result;
+	}
 }
